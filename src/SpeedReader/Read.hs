@@ -1,7 +1,22 @@
-module SpeedReader.Read (speedRead, bookmarkRead) where
+module SpeedReader.Read (speedRead, bookmarkRead, audioRead) where
+
+import Data.List (nub)
 
 import SpeedReader.Utils
 import SpeedReader.Bookmark
+import SpeedReader.File
+
+audioRead :: Float -> String -> IO ()
+-- takes an unparsed input (from pdftotext)
+-- returns a wav file and plays it
+--
+-- print filename to screen
+audioRead _ xs = createAudiobookWAV $ sentence $ filter' xs
+  where sentence (x:xs) = nub $ buffering [] (x:xs)
+        buffering buffer ('.':xs) = (buffer ++ ".") : buffering [] xs
+        buffering buffer (x:xs)   = buffering (buffer ++ [x]) xs
+        buffering buffer []       = buffer : []
+        filter' = filter (/='\n')
 
 speedRead :: Float -> [String] -> IO ()
 -- takes wpm and list of strings as arguments
@@ -25,8 +40,8 @@ bookmarkRead n f wpm ws = bmr n f wpm (skip 0 ws)
 -- helper function for bookmarkRead
 bmr :: Bookmark -> BookmarkName ->
        Float    -> [String]     -> IO ()
-bmr _ _ _ []       = return ()
-bmr _ f _ [w]      = writeBookmark 0 f >> writeWord w
+bmr _ f _ []       = writeBookmark 0 f
+bmr _ f _ [w]      = writeWord w >> writeBookmark 0 f
 bmr n f wpm (w:ws) = do
   writeWord w
   writeBookmark n f

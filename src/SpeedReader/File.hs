@@ -1,9 +1,11 @@
-module SpeedReader.File (processFile, processPDF) where
+module SpeedReader.File (processFile, processPDF, createAudiobookWAV) where
 
 import System.Process  ( StdStream(..)
                        , createProcess 
                        , CreateProcess(..)
                        , proc
+                       , shell
+                       , callCommand
                        )
 import System.IO (hGetContents, hClose)
 
@@ -18,11 +20,7 @@ getFileType fp =
     where (e, f) = break (=='.') $ reverse fp
           (filename, extension) = (reverse f, reverse e)
 
-processFile :: FilePath -> IO [String]
--- takes filename and converts to [String]
--- uses pdftotext -nopgbrk -q
--- 
--- if file is text, just get it
+processFile :: FilePath -> IO String
 processFile fp =
   case getFileType fp of
     PDF -> do
@@ -35,11 +33,11 @@ processFile fp =
                ) { cwd     = Nothing
                  , std_out = CreatePipe }
              out <- hGetContents hout
-             return (words out)
-    TXT -> words <$> readFile fp
+             return out
+    TXT -> readFile fp
 
 -- allows user to specify first and last page of a pdf
-processPDF :: FilePath -> String -> String -> IO [String]
+processPDF :: FilePath -> String -> String -> IO String
 processPDF fp f l = do
   (_, Just hout, _, _) <- createProcess $
     (proc "pdftotext" ["-f"
@@ -54,4 +52,18 @@ processPDF fp f l = do
     ) { cwd     = Nothing
       , std_out = CreatePipe }
   out <- hGetContents hout
-  return (words out)
+  return out
+
+createAudiobookWAV :: [String] -> IO ()
+createAudiobookWAV xs = do
+  -- create empty wav file
+  callCommand "rec tmp.wav trim 0 1"
+  putStrLn "done with making tmp file"
+  createAudiobookWAV' xs
+  putStrLn "done with making audio file"
+
+createAudiobookWAV' []     = pure ()
+createAudiobookWAV' (s:ss) = do
+  putStrLn $ "zipwav tmp.wav \"" ++ s ++ "\""
+  callCommand $ "zipwav tmp.wav \"" ++ s ++ "\""
+  createAudiobookWAV' ss

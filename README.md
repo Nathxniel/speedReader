@@ -1,5 +1,7 @@
 ## dependancies
-- "pdftotext" program
+- pdftotext
+- SoX (play, rec)
+- ffmpeg
 
 ## known bugs
 - using too high a reading speed causing file to lock (cannot be opened).

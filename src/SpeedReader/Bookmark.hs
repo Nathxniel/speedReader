@@ -39,6 +39,7 @@ writeBookmark n f = do
   bookmarkFile <- getBookmarkFile f
   handle <- openFile bookmarkFile WriteMode
   hPutStrLn handle (show n)
+  hClose handle
 
 -- gets bookmark data from file at bookmark file path
 getBookmarkData :: BookmarkName -> IO Bookmark
