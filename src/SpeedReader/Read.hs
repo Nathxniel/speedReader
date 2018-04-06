@@ -6,12 +6,12 @@ import SpeedReader.Utils
 import SpeedReader.Bookmark
 import SpeedReader.File
 
-audioRead :: Float -> String -> IO ()
+audioRead :: String -> IO ()
 -- takes an unparsed input (from pdftotext)
 -- returns a wav file and plays it
 --
 -- print filename to screen
-audioRead _ xs = createAudiobookWAV $ sentence $ filter' xs
+audioRead xs = createAudiobookWAV $ sentence $ filter' xs
   where sentence (x:xs) = nub $ buffering [] (x:xs)
         buffering buffer ('.':xs) = (buffer ++ ".") : buffering [] xs
         buffering buffer (x:xs)   = buffering (buffer ++ [x]) xs

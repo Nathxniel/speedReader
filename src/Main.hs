@@ -17,7 +17,7 @@ main = do
   case args of
     "-h":_            -> usage
     ["-c",words,pages] -> putStrLn $ progress words pages
-    ["-a",wpm,file]   -> processFile file >>= audioRead (read' wpm)
+    ["-a",file]       -> processFile file >>= audioRead
     [wpm, file, f, l] -> words <$> (processPDF file f l) >>= speedRead (read' wpm)
     [wpm, file]       -> do
                            -- do the bookmark processing

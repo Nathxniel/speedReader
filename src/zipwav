@@ -1,16 +1,12 @@
-#!/bin/bash
+#!/bin/bash 
 
-file=$1
-echo zipwave: $file
-shift;
-echo zipwave: $@
-
-pico2wave -w next.wav \"$@\" &>/dev/null
-
-yes Y | ffmpeg \
-  -i $file \
-  -i next.wav \
-  -filter_complex '[0:0][1:0][2:0][3:0]concat=n=2:v=0:a=1[out]' \
-  -map '[out]' $file &>/dev/null
-
-#rm next.wav
+read fst
+ARGS="$@"
+if [ "$fst" == "make" ]; then
+  pico2wave -w CREATED_AUDIOBOOK.wav "$ARGS"
+else
+  pico2wave -w tmp.wav "$ARGS"
+  sox CREATED_AUDIOBOOK.wav tmp.wav out.wav
+  mv out.wav CREATED_AUDIOBOOK.wav
+fi
+rm -f tmp.wav
